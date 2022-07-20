@@ -1,3 +1,9 @@
+# Sorta Obvious Questions
+* Why/how is this different than terragrunt's native "remote state resources don't exist" detection & creation?
+    * Creates an arbitrary number of resources
+    * Can reference other modules that might specify standard practices
+    * The resource definition(s) will be more familiar to those coming from TF, and aren't terragrunt specific
+
 # AWS Account Bootstrapper
 The bootstrap process is a required pre-condition for utilizing an AWS account for usage as a target for deployment. Essentially, it takes care of ensuring we have the prerequisites (such as terraform state storage, IAM roles, IAM policies) deployed for usage by the Nerdamigo pipeline and/or local development.
 
