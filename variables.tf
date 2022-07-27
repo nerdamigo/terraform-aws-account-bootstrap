@@ -10,4 +10,12 @@ variable "state_bucket_name" {
 variable "common_tags" {
     type = map(string)
     description="Map of tags that should be applied to created resources"
+
+    validation {
+        error_message = "Missing required tag keys"
+        condition = length(setsubtract(
+            ["na:app_id", "na:app_version"] # required tag key list
+            , keys(var.common_tags)
+        )) == 0
+    }
 }

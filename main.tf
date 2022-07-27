@@ -1,6 +1,4 @@
-resource "aws_s3_bucket" "state_bucket" {
-  bucket = var.state_bucket_name
+// TODO: consider side-by-side deployment (branches; parallel builds)
+locals {
 
-  tags = merge({
-  }, var.common_tags)
 }
