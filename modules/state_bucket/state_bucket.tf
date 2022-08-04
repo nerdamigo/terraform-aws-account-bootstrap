@@ -1,5 +1,8 @@
+data "aws_caller_identity" "current" { }
+data "aws_region" "current" {}
+
 resource "aws_s3_bucket" "state_bucket" {
-  bucket = var.state_bucket_name
+  bucket = join("-", [ var.organization_prefix, data.aws_caller_identity.current.account_id, data.aws_region.current.name ])
 
   tags = merge({
   }, var.common_tags)
@@ -11,6 +14,8 @@ resource "aws_s3_bucket_public_access_block" "state_bucket" {
 
   block_public_acls   = true
   block_public_policy = true
+  ignore_public_acls  = true
+  restrict_public_buckets = true
 }
 
 //disable ACLs (performance)
@@ -45,7 +50,8 @@ data "aws_iam_policy_document" "state_bucket" {
     }
 }
 
-//logging
+//logging (skipping for now as it is expected CloudTrail will be used)
+// https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudtrail-logging.html
 
 //encryption
 

@@ -4,7 +4,9 @@ locals {
   bootstrapping_version = "v1"
 
   aws_account_id = get_aws_account_id()
-  bucket_name = lower(join("-", flatten([ regexall("[a-z0-9]+", local.bootstrapping_prefix), local.aws_account_id])))
+
+  bucket_prefix = lower(join("-", flatten([ regexall("[a-z0-9]+", local.bootstrapping_prefix), local.aws_account_id])))
+
   lock_table = lower(join("-", flatten([ regexall("[a-z0-9]+", local.bootstrapping_prefix) ])))
   state_key = "bootstrapping/terraform.tfstate"
   
@@ -43,7 +45,7 @@ EOF
   remote_state_backend = <<EOF
 terraform {
   backend "s3" {
-    bucket = "${local.bucket_name}"
+    bucket = "${local.bucket_prefix}"
     key = "${local.state_key}"
     dynamodb_table = "${local.lock_table}"
   }
@@ -78,7 +80,7 @@ generate "tfvars" {
   if_exists = "overwrite"
   contents = <<EOF
 # generated at ${timestamp()}
-state_bucket_name = "${local.bucket_name}"
+state_bucket_prefix = "${local.bucket_prefix}"
 common_tags = {
   "na:app_id" = "account_deployment_bootstrapper"
   "na:app_version" = "${local.bootstrapping_version}"

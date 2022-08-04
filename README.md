@@ -44,3 +44,12 @@ You'll need the following installed & available on your command line:
 
 ## Module List / Documentation
 TODO - https://github.com/terraform-docs/terraform-docs
+
+
+
+
+
+# Thoughts
+A given major version of this module provides:
+* Ability to create resources
+* Ability to "discover" resources based on the input variables - and thus detect if a given version has been deployed
