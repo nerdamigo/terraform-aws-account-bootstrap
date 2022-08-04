@@ -4,13 +4,13 @@
 terraform {
   # NOTE: when testing, use terragrunt cli option: --terragrunt-source-map 'git::https://github.com/nerdamigo/terraform-aws-account-bootstrap=../..'
   source = "git::https://github.com/nerdamigo/terraform-aws-account-bootstrap//.?ref=v1.0"
-  
+
   before_hook "generate_config" {
     # this list of commands must be comprehensive with respect to those that require/interact w/ the tf state
     # note that if terragrunt detects / decides to run init as a precondition, this hook will run 2x
-    commands = [ "init", "plan", "apply", "destroy", "state", "refresh", "force-unlock", "import", "output", "taint" ]
-    execute = [ 
-      "./bootstrap.sh", 
+    commands = ["init", "plan", "apply", "destroy", "state", "refresh", "force-unlock", "import", "output", "taint"]
+    execute = [
+      "./bootstrap.sh",
       "generate_backend",
       get_terraform_command(),
       get_original_terragrunt_dir()
@@ -22,9 +22,9 @@ terraform {
 
 inputs = {
   organization_prefix = "nerdamigo"
-  
+
   region_map = {
-    "us-west-2" = { 
+    "us-west-2" = {
       primary = true
     }
 

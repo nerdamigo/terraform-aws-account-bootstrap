@@ -7,8 +7,8 @@ generate "region_providers" {
   if_exists = "overwrite"
   contents = <<EOF
 # generated at ${timestamp()}
-${join("\n", [ for region, region_config in local.common_inputs.regions :
-<<PROVIDERS
+${join("\n", [for region, region_config in local.common_inputs.regions :
+  <<PROVIDERS
 provider "aws" {
   alias = "${region}"
   region = "${region}"

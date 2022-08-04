@@ -6,15 +6,15 @@ inputs = merge(
   local.common_inputs,
   {
 
-  })
+})
 
 generate "deployed_version_detection" {
   path      = "__generated_deployed_version_detection.tf"
   if_exists = "overwrite"
   contents = <<EOF
 # generated at ${timestamp()}
-${join("\n", [ for region, region_config in local.common_inputs.regions :
-<<DETECTION
+${join("\n", [for region, region_config in local.common_inputs.regions :
+  <<DETECTION
 module "detection_${region}" {
   source = "./modules/deployed_version_detection"
   providers = {
@@ -34,14 +34,4 @@ EOF
 
 terraform {
   source = "git::https://github.com/nerdamigo/terraform-aws-account-bootstrap//.?ref=v1.0"
-
-  extra_arguments "disable_input" {
-    commands  = get_terraform_commands_that_need_input()
-    arguments = ["-input=false"]
-  }
-
-  extra_arguments "non_interactive" {
-    commands  = [ get_terraform_command() ]
-    arguments = ["--auto-approve"]
-  }
 }

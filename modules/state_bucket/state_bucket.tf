@@ -1,20 +1,23 @@
-data "aws_caller_identity" "current" { }
+data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-resource "aws_s3_bucket" "state_bucket" {
-  bucket = join("-", [ var.organization_prefix, data.aws_caller_identity.current.account_id, data.aws_region.current.name ])
+module "app_tags" {
+  source = "../app_tags"
+}
 
-  tags = merge({
-  }, var.common_tags)
+resource "aws_s3_bucket" "state_bucket" {
+  bucket = join("-", [var.organization_prefix, data.aws_caller_identity.current.account_id, data.aws_region.current.name])
+
+  tags = merge(module.app_tags.tags, var.common_tags)
 }
 
 //block public access
 resource "aws_s3_bucket_public_access_block" "state_bucket" {
   bucket = aws_s3_bucket.state_bucket.id
 
-  block_public_acls   = true
-  block_public_policy = true
-  ignore_public_acls  = true
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
@@ -38,16 +41,18 @@ resource "aws_s3_bucket_policy" "state_bucket" {
 }
 
 data "aws_iam_policy_document" "state_bucket" {
-    statement {
-        sid = "allow_all"
-        principals {
-            type = "*"
-            identifiers = [ "*" ]
-        }
+  statement {
+    sid = "allow_all"
+    principals {
+      type = "AWS"
 
-        actions = [ "*" ]
-        resources = [ aws_s3_bucket.state_bucket.arn, "${aws_s3_bucket.state_bucket.arn}/*" ]
+      # only grants access to this bucket to the owning account
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
+
+    actions   = ["*"]
+    resources = [aws_s3_bucket.state_bucket.arn, "${aws_s3_bucket.state_bucket.arn}/*"]
+  }
 }
 
 //logging (skipping for now as it is expected CloudTrail will be used)

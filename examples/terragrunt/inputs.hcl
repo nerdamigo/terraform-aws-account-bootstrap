@@ -1,5 +1,5 @@
 # // configurable for your organization
-inputs = {  
+inputs = {
   organization_prefix = "nabs"
 
   regions = {
