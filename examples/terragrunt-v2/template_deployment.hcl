@@ -19,8 +19,8 @@ terraform {
   source = "git::https://github.com/nerdamigo/terraform-aws-account-bootstrap//.?ref=v1.0"
 }
 
-generate "detection" {
-    path = "detect_${id}.tf"
+generate "deployment" {
+    path = "deployment_${id}.tf"
     if_exists = "overwrite"
     contents = <<EOF
 # generated at ${timestamp()}
