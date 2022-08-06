@@ -13,6 +13,11 @@ inputs = merge(
 
 terraform { 
   source = "git::https://github.com/nerdamigo/terraform-aws-account-bootstrap//.?ref=v1.0"
+  
+  after_hook "describe_command" {
+    commands     = [ "terragrunt-read-config" ]
+    execute      = [ "echo", "Detection stack running command '$${get_terraform_command()}', with arguments '$${join(" ", get_terraform_cli_args())}'" ]
+  }
 }
 
 generate "detection" {

@@ -5,7 +5,7 @@ locals {
   generate_deployment_tg = {
     for id, region_config in local.region_details.regions_with_global:
     "${id}-depoyment-tg" => {
-      contents = templatefile("template_deployment.hcl", region_config)
+      contents = templatefile("template_deployment.hcl", merge(region_config, { terragrunt_dir = get_terragrunt_dir() }))
       path = ".generated/deployment/${id}/"
       filename = "terragrunt.hcl"
     }
