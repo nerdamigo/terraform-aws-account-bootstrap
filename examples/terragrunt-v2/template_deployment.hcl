@@ -24,10 +24,16 @@ generate "detection" {
     if_exists = "overwrite"
     contents = <<EOF
 # generated at ${timestamp()}
+
+# region-appropriate provider
 provider "aws" {
   alias = "${id}"
   region = "${region}"
 }
+
+# IAM roles/policies (replication, user deployment)
+
+# state bucket
 %{if id != "global" }
 module "state_bucket_${region}" {
   source = "./modules/state_bucket"
@@ -40,6 +46,8 @@ module "state_bucket_${region}" {
     aws = aws.${region}
   }
 }
+
 %{endif}
+
 EOF
 }

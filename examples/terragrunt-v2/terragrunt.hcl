@@ -14,7 +14,7 @@ locals {
 }
 
 terraform {
-  # run detection process to identify any pre-existing deployments of bootstrapping
+  # phase 1: run detection process to identify any pre-existing deployments of bootstrapping
   after_hook "init_detection" {
     commands     = [ "terragrunt-read-config" ]
     working_dir  = ".generated"
@@ -33,25 +33,8 @@ terraform {
     ]
   }
 
-  # before any commands that would depend on state - import those resources if they are not already in state
+  # phase 1.1: before any commands that would depend on state - import those resources if they are not already in state
   # this is to "recover" if we get partway through a deployment before state has been persisted, and fail to migrate state
-  #    TODO: for each resource in a deployment's plan, import matching known resources idenfied during detection phase  
-  # after_hook "list_known_state" {
-  #   commands     = [ "terragrunt-read-config" ]
-  #   working_dir  = ".generated"
-  #   execute      = [ "bash", "-c", 
-  #     "rm -f known-state-addresses.txt && terragrunt run-all state list --terragrunt-include-dir './deployment/*' --terragrunt-non-interactive >> known-state-addresses.txt"
-  #   ]
-  # }
-
-  # after_hook "import_known_state" {
-  #   commands     = [ "terragrunt-read-config" ]
-  #   working_dir  = ".generated"
-  #   execute      = [ "bash", "-c", 
-  #     "xargs -n 1 -I'{}' echo 'Processing State Item: {}' <known-state-addresses.txt"
-  #   ]
-  # }
-
 
   # now we can run whatever command is desired on each of the configured deployment regions + global
   after_hook "run_command" {

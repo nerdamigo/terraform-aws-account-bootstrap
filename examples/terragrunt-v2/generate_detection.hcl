@@ -5,7 +5,7 @@ locals {
   generate_detection_tg = {
     for id, region_config in local.region_details.regions_with_global:
     "${id}-depoyment-tg" => {
-      contents = templatefile("detection_template.hcl", region_config)
+      contents = templatefile("template_detection.hcl", region_config)
       path = ".generated/detection/${id}/"
       filename = "terragrunt.hcl"
     }
