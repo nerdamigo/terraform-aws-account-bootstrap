@@ -53,3 +53,9 @@ TODO - https://github.com/terraform-docs/terraform-docs
 A given major version of this module provides:
 * Ability to create resources
 * Ability to "discover" resources based on the input variables - and thus detect if a given version has been deployed
+
+//TODO: cloudtrail data events for s3 operations
+// https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudtrail
+// event selector based on bucket tag...?
+// event selector(s) don't support tags, but can auto-create secondary trails to capure data events & manage the
+// selector(s) based on tags (good module idea)

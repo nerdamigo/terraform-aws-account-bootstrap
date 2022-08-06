@@ -9,17 +9,24 @@ terraform {
 
 module "app_tags" {
   source = "../app_tags"
+  app_stack_id = var.app_stack_id
 }
 
 locals {
   app_id = module.app_tags.tags["na:app_id"]
+  app_stack_id = module.app_tags.tags["na:app_stack_id"]
 }
 
 # uses data types to "discover" deployed versions of boostrapper resources
 data "aws_resourcegroupstaggingapi_resources" "target" {
   tag_filter {
     key    = "na:app_id"
-    values = [local.app_id]
+    values = [ local.app_id ]
+  }
+
+  tag_filter {
+    key    = "na:app_stack_id"
+    values = [ local.app_stack_id ]
   }
 
   tag_filter {

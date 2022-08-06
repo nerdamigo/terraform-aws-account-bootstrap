@@ -56,7 +56,7 @@ EOF
 terraform {
   after_hook "move_generated_files" {
     commands = ["init"]
-    execute  = ["sh", "-c", "mv ./__generated_* .."]
+    execute  = ["sh", "-c", "mv ./.generated_* .."]
   }
 
   # after an "apply" is run, we can run a "plan" to check that there are no differences, then run the state migrate
@@ -67,7 +67,7 @@ terraform {
 }
 
 generate "backend" {
-  path      = "__generated_backend.tf"
+  path      = ".generated_backend.tf"
   if_exists = "overwrite"
   contents  = <<EOF
 # generated at ${timestamp()}
@@ -76,7 +76,7 @@ EOF
 }
 
 generate "tfvars" {
-  path      = "__generated_inputs.auto.tfvars"
+  path      = ".generated_inputs.auto.tfvars"
   if_exists = "overwrite"
   contents  = <<EOF
 # generated at ${timestamp()}

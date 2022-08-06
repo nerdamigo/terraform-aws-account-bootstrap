@@ -48,14 +48,14 @@ generate_backend() {
     TF_COMMAND=$1
 
     echo "Generating backend configuration for execution of command '${TF_COMMAND}'"
-    mkdir -p __generated_stateWorkdir
-    touch __generated_stateWorkdir/empty.tf
+    mkdir -p .generated_stateWorkdir
+    touch .generated_stateWorkdir/empty.tf
 
     # run TG processing over the state_config to trigger generation of the backend config
     # based on whether the target has already been bootstrapped
     # comment out the  '2>&1 > /dev/null' if you'd like to see diagnostic output
-    terragrunt init --terragrunt-working-dir __generated_stateWorkdir --terragrunt-config ./bootstrap.hcl #2>&1 > /dev/null
-    rm -rf __generated_stateWorkdir
+    terragrunt init --terragrunt-working-dir .generated_stateWorkdir --terragrunt-config ./bootstrap.hcl #2>&1 > /dev/null
+    rm -rf .generated_stateWorkdir
 }
 
 COMMAND=$1

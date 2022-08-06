@@ -3,6 +3,7 @@ data "aws_region" "current" {}
 
 module "app_tags" {
   source = "../app_tags"
+  app_stack_id = var.app_stack_id
 }
 
 resource "aws_s3_bucket" "state_bucket" {
@@ -59,16 +60,38 @@ data "aws_iam_policy_document" "state_bucket" {
 // https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudtrail-logging.html
 
 //encryption
+resource "aws_s3_bucket_server_side_encryption_configuration" "state_bucket" {
+  bucket = aws_s3_bucket.state_bucket.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
 
 //versioning
+resource "aws_s3_bucket_versioning" "state_bucket" {
+  bucket = aws_s3_bucket.state_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 
-//TODO: replication & failover
-// challenges:
-//  1/ problem with a "duplicate" copy of state; therefore need to limit search to our "primary" region
-//  2/ concept of "failover" or otherwise atomic designation of the primary region
-//  3/ in the event of a failover, need to disable/ignore mutations/reads to or from the secondary region
-// ideas
-//  * replication is one thing, but what about backup? versioning would be enabled
-//  * something like MFA delete; the "failover" process might need to take over/mutate this policy
+//lifecycle configuration
+resource "aws_s3_bucket_lifecycle_configuration" "state_bucket" {
+  bucket = aws_s3_bucket.state_bucket.id
 
-//lifecycle (delete old versions)
+  rule {
+    id = "remove-expired-versions"
+
+    filter {}
+
+    noncurrent_version_expiration {
+      newer_noncurrent_versions = 10 # keep up to 10 previous versions
+      noncurrent_days = 30 # remove any versions older than 30 days (retaining the count mentioned above)
+    }
+
+    status = "Enabled"
+  }
+}

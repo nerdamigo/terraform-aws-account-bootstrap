@@ -19,7 +19,7 @@ dependency "deployment_status" {
 }
 
 generate "test_shim" {
-  path      = "__generated_dummy_shim.tf"
+  path      = ".generated_dummy_shim.tf"
   if_exists = "overwrite"
   contents  = <<EOF
 /*
@@ -30,7 +30,7 @@ EOF
 
 # and generate TF as necessary
 generate "deployment" {
-  path      = "__generated_state_buckets.tf"
+  path      = ".generated_state_buckets.tf"
   if_exists = "overwrite"
   contents = <<EOF
 # generated at ${timestamp()}
@@ -49,3 +49,12 @@ BUCKETS
 ])}
 EOF
 }
+
+//TODO: replication & failover
+// challenges:
+//  1/ problem with a "duplicate" copy of state; therefore need to limit search to our "primary" region
+//  2/ concept of "failover" or otherwise atomic designation of the primary region
+//  3/ in the event of a failover, need to disable/ignore mutations/reads to or from the secondary region
+// ideas
+//  * replication is one thing, but what about backup? versioning would be enabled
+//  * something like MFA delete; the "failover" process might need to take over/mutate this policy

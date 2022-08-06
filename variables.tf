@@ -7,21 +7,16 @@ variable "organization_prefix" {
   }
 }
 
-variable "common_tags" {
-  type        = map(string)
-  description = "Map of tags that should be applied to created resources"
-
+variable "app_stack_id" {
+  type        = string
+  description = "A string that will be used to identify which stack this app's deployment represents"
   validation {
-    error_message = "Missing required tag keys"
-    condition = length(setsubtract(
-      [] #["na:app_id", "na:app_version"] # required tag key list
-      , keys(var.common_tags)
-    )) == 0
+    condition     = lower(regex("[a-z0-9-]+", var.app_stack_id)) == var.app_stack_id
+    error_message = "app_stack_id must consist of lowercase characters in the set { a-z, 0-9, - }"
   }
 }
 
-/*
-variable "region_map" {
-    type = map(object({ primary = bool }))
+variable "common_tags" {
+  type        = map(string)
+  description = "Map of tags that should be applied to created resources"
 }
-*/
