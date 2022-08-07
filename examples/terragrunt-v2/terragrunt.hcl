@@ -34,33 +34,24 @@ CMD
   # phase 2: execution of requested terraform commands in each region
   after_hook "execute" {
     commands     = [ "terragrunt-read-config" ]
-    #commands     = [ contains([ "apply" ], get_terraform_command()) ? "terragrunt-read-config" : "noop" ]
     working_dir  = ".generated"
     execute      = [ "bash", "-c"
       ,<<CMD
-# ensure init runs before whatever command
+# ensure init runs before whatever command (so don't run if command IS init)
 [ "init" == "${get_terraform_command()}" ] || terragrunt run-all init --terragrunt-include-dir './deployment/*' --terragrunt-non-interactive
 
 # phase 2.1: if non-destructive, go ahead
 [ "destroy" == "${get_terraform_command()}" ] || echo "Execution beginning for command '${get_terraform_command()}', with arguments '${join(" ", get_terraform_cli_args())}'"
 [ "destroy" == "${get_terraform_command()}" ] || terragrunt run-all ${join(" ", get_terraform_cli_args())} --terragrunt-include-dir './deployment/*' --terragrunt-non-interactive --terragrunt-no-auto-init
-CMD
-    ]
-  }
 
-  # phase 2.1.2: if "apply" - migrate state
-  # https://www.terraform.io/cli/commands/state/push
-  after_hook "migrate_state_after_apply" {
-    commands     = [ contains([ "apply" ], get_terraform_command()) ? "terragrunt-read-config" : "noop" ]
-    working_dir  = ".generated"
-    execute      = [ "bash", "-c"
-      ,<<CMD
-terragrunt run-all apply -lock-timeout=0s --auto-approve --terragrunt-include-dir './detection/*' --terragrunt-non-interactive --terragrunt-no-auto-init
-pushd detection
-rm -f detection-output.json
-terragrunt run-all output -json --terragrunt-no-auto-init >> detection-output.json
+# store output values for each stack
+pushd deployment
+rm -f deployment-output.json
+terragrunt run-all output -json --terragrunt-no-auto-init >> deployment-output.json
 popd
-MIGRATE_STATE=test_value terragrunt run-all init -migrate-state -force-copy --terragrunt-include-dir './deployment/*' --terragrunt-no-auto-init
+
+# phase 2.1.2: if "apply" - migrate state
+[ "apply" != "${get_terraform_command()}" ] || MIGRATE_STATE=test_value terragrunt run-all init -migrate-state -force-copy --terragrunt-include-dir './deployment/*' --terragrunt-no-auto-init
 CMD
     ]
   }

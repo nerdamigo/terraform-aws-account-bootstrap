@@ -4,15 +4,27 @@ locals {
   user_inputs = read_terragrunt_config(find_in_parent_folders("common_user_inputs.hcl")).inputs
   region_details = read_terragrunt_config(find_in_parent_folders("common_region_details.hcl")).inputs
   detection_output_path = "../../detection/detection-output.json"
+  deployment_output_path = "deployment-output.json"
 
   //have to handle the syntax error of }\{ that is present due to how the output from detection is aggregated
   detection_output = fileexists(local.detection_output_path) ? jsondecode(replace(file(local.detection_output_path), "}\n{", ",")) : null
+  deployment_output = fileexists(local.deployment_output_path) ? jsondecode(replace(file(local.deployment_output_path), "}\n{", ",")) : null
 
   //determine if "official" state for this deployment is:
   // * local (no deployments detected)
   // * remote_v[other_app_version] (version other than current detected as already deployed)
   // * remote_v[app_version] (current version detected as already deployed)
   // selection of "official" state file is based on the file w/ the highest "serial"
+
+  // priority is ENV var, highest detected serial, local
+  // if env:MIGRATE_STATE == "true"; lookup the bucket that was just created || the "primary" bucket for global
+  backend_target = null
+  backend_serial_highest = null
+  backend_location = coalesce(
+    lower(get_env("MIGRATE_STATE", "false")) == "true" ? local.backend_target : null, 
+    local.backend_serial_highest != null ? lookup(local.detection_output, local.backend_serial_highest) : null,
+    "local"
+  )
 }
 
 inputs = merge(
@@ -62,6 +74,7 @@ provider "aws" {
 }
 
 # IAM roles/policies (replication, user deployment)
+data "aws_caller_identity" "current" {}
 
 # state bucket
 %{if id != "global" }
@@ -76,8 +89,16 @@ module "state_bucket_${region}" {
     aws = aws.${region}
   }
 }
-
 %{endif}
 
+output "deployment_${id}" {
+  value = { 
+    %{if id != "global" }
+    bucket = module.state_bucket_${id}.bucket
+    %{endif}
+    id = "${id}"
+    account = data.aws_caller_identity.current.account_id
+  }
+}
 EOF
 }

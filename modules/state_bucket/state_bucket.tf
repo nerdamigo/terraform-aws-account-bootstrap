@@ -12,6 +12,10 @@ resource "aws_s3_bucket" "state_bucket" {
   tags = merge(module.app_tags.tags, var.common_tags)
 }
 
+output "bucket" {
+  value = aws_s3_bucket.state_bucket.bucket
+}
+
 //block public access
 resource "aws_s3_bucket_public_access_block" "state_bucket" {
   bucket = aws_s3_bucket.state_bucket.id
